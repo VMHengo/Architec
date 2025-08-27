@@ -65,13 +65,38 @@ CMakeLists.txt.user*
 *.Debug
 *.Release
 
-# Python byte code
+# Python cache / compiled files
+__pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.qtc﻿reator/Python_3_10_10venv/
+
+# IDE / editor configs
+.vscode/
+.idea/
+*.user
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
 
 # Binaries
 # --------
 *.dll
 *.exe
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
 
 # Directories with generated files
 .moc/
@@ -80,3 +105,7 @@ CMakeLists.txt.user*
 .rcc/
 .uic/
 /build*/
+
+# OS-specific
+.DS_Store
+Thumbs.db
