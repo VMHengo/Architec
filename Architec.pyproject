@@ -1,6 +1,7 @@
 {
     "files": [
         "mainwindow.py",
-        "form.ui"
+        "form.ui",
+        "assets/modern_house.jpg"
     ]
 }
