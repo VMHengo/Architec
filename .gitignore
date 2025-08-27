@@ -107,7 +107,6 @@ env/
 
 # PyInstaller build artifacts
 build/
-dist/
 *.spec
 
 # Ignore everything in dist except exe
