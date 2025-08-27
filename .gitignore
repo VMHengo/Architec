@@ -91,7 +91,6 @@ env/
 # Binaries
 # --------
 *.dll
-*.exe
 
 # Logs and temp files
 *.log
