@@ -1,7 +1,11 @@
 {
     "files": [
-        "mainwindow.py",
-        "form.ui",
-        "assets/modern_house.jpg"
+        "assets/modern_house.jpg",
+        "src/canny_dialog.py",
+        "src/mainwindow.py",
+        "src/ui_canny_dialog.py",
+        "src/ui_form.py",
+        "ui/canny_dialog.ui",
+        "ui/form.ui"
     ]
 }

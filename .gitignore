@@ -96,6 +96,7 @@ env/
 *.log
 *.tmp
 *.bak
+scripts/
 
 # Directories with generated files
 .moc/
