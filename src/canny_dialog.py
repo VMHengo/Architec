@@ -23,12 +23,18 @@ if TESTING:
 
 class CannyDialog(QDialog, Ui_Dialog):
 
+    sendImage = Signal(object)
+    requestImage = Signal()
+
     def __init__(self, original_img, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowTitle("Canny Edge Settings")
 
-        self.original_img = original_img
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+
+        self.imageData = original_img
         self.processed_img = None
 
         # button box
@@ -59,23 +65,30 @@ class CannyDialog(QDialog, Ui_Dialog):
         if self.checkBox_toggleLive.isChecked():
             self.apply_canny_edge()
 
-    image_processed = Signal(object)
-
     def apply_canny_edge(self):
         t1 = self.slider_lowerThresh.value()
         t2 = self.slider_upperThresh.value()
 
         # image processing for canny edge
-        gray = cv2.cvtColor(self.original_img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(self.imageData, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 1.4)
         edges = cv2.Canny(blurred, t1, t2)
         self.processed_img = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
-        self.image_processed.emit(self.processed_img)
+        self.sendProcessedImage()
 
     def reject(self):
         self.accept()
 
     def on_reset(self):
         self.processed_img = None
-        self.image_processed.emit(self.original_img)
+        self.sendImage.emit(self.imageData)
+
+    # --- Signal functions ---
+
+    def receiveImage(self, img):
+        self.imageData = img
+
+    def sendProcessedImage(self):
+        if self.processed_img.any():
+            self.sendImage.emit(self.processed_img)

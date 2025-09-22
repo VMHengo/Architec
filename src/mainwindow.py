@@ -10,6 +10,7 @@ from PySide6.QtCore import QFile, Qt
 
 from ui_form import Ui_MainWindow
 from canny_dialog import CannyDialog
+from vanishing_point_dialog import VanishingPointDialog
 
 TESTING = False
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -30,6 +31,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
+        self.cv_image = None
+
         icon_filePath = os.path.join(PROJECT_DIR, "assets", "icon.ico")
         self.setWindowIcon(QIcon(icon_filePath))
         self.setWindowTitle("Architec 0.1")
@@ -39,11 +42,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.actionLoadImage = self.menuFile.addAction("Load Image")
         self.actionCannyEdge = self.menuTools.addAction("Canny Edge")
+        self.actionVanishingPoint = self.menuTools.addAction("Find Vanishing Point")
 
         self.actionLoadImage.triggered.connect(self.load_image)
         self.actionCannyEdge.triggered.connect(self.open_canny_dialog)
+        self.actionVanishingPoint.triggered.connect(self.open_vanishing_point_dialog)
 
-        # Track last used directory
         self.last_dir = ""
 
     def load_image(self):
@@ -59,7 +63,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.last_dir = os.path.dirname(file_path)
 
-        # --- Load image with OpenCV ---
+        # Load image with OpenCV
         img = cv2.imread(file_path)
         if img is None:
             raise RuntimeError("Failed to load image")
@@ -68,19 +72,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         target_width = self.graphicsView.width()
         target_height = self.graphicsView.height()
 
-        # --- Compute new size keeping aspect ratio ---
+        # Compute new size keeping aspect ratio
         scale_w = target_width / orig_width
         scale_h = target_height / orig_height
-        scale = min(scale_w, scale_h)  # scale to fit inside view
+        scale = min(scale_w, scale_h)
 
         new_width = int(orig_width * scale)
         new_height = int(orig_height * scale)
 
-        # --- Resize with high-quality interpolation ---
         resized = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
         self.cv_image = resized.copy()
 
-        # --- Convert to QPixmap ---
+        # Convert to QPixmap
         qimg = QImage(
             resized.data,
             resized.shape[1],
@@ -99,15 +102,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.graphicsView.setRenderHint(QPainter.SmoothPixmapTransform)
         self.graphicsView.fitInView(self.scene.itemsBoundingRect(), Qt.KeepAspectRatio)
 
-    def open_canny_dialog(self):
-        dialog = CannyDialog(self.cv_image, self)
-        dialog.image_processed.connect(self.update_image_from_dialog)
-        dialog.show()
-
-    def update_image_from_dialog(self, img):
+    def display_image_data(self, img):
+        self.cv = img
         qimage = QImage(img.data, img.shape[1], img.shape[0], img.strides[0], QImage.Format_BGR888)
         pixmap = QPixmap.fromImage(qimage)
         self.display_pixmap(pixmap)
+
+    def open_canny_dialog(self):
+        dialog = CannyDialog(self.cv_image, self)
+        dialog.sendImage.connect(self.handle_processed_image)
+        dialog.requestImage.connect(self.handle_request_image)
+        dialog.show()
+
+    def open_vanishing_point_dialog(self):
+        dialog = VanishingPointDialog(self.cv_image, self)
+        dialog.sendImage.connect(self.handle_processed_image)
+        dialog.requestImage.connect(self.handle_request_image)
+        dialog.show()
+        self.open_canny_dialog()
+
+    def handle_request_image(self):
+        sender = self.sender()
+        if sender:
+            sender.receiveImage(self.cv_image)
+
+    def handle_processed_image(self, img):
+        sender = self.sender()
+        if sender:
+            self.cv_image = img
+            self.display_image_data(self.cv_image)
 
 
 if __name__ == "__main__":

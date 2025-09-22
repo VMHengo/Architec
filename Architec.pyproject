@@ -1,11 +1,13 @@
 {
     "files": [
         "assets/modern_house.jpg",
+        "src/vanishing_point_dialog.py",
         "src/canny_dialog.py",
         "src/mainwindow.py",
         "src/ui_canny_dialog.py",
         "src/ui_form.py",
         "ui/canny_dialog.ui",
-        "ui/form.ui"
+        "ui/form.ui",
+        "ui/vanishing_point_dialog.ui"
     ]
 }
