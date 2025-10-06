@@ -11,9 +11,12 @@ Currently the project is in its baby stage. It is coded in QTCreator and only co
 - Apply Canny Edge to Image (Live Updates possible by Slider)
 
 ## Current tasks
-# Vanishing Point Detection
+
+### Vanishing Point Detection
 - The first problem is in the feature extraction as the amount of clutter in images lead to many undesired edges 
 when detecting them with Canny Edge detector for example.
 - The second problem is the prediction of the vanishing point as RANSAC isnt accurate with the current features
-# Grid drawing
-# Saving images
+  
+### Grid drawing
+
+### Saving images
