@@ -8,17 +8,18 @@ from PySide6.QtGui import QPixmap, QPainter, QImage, QIcon
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, Qt
 
-from ui_form import Ui_MainWindow
+from ui_python.ui_form import Ui_MainWindow
 from canny_dialog import CannyDialog
+from grid_dialog import GridDialog
 from vanishing_point_dialog import VanishingPointDialog
 
-TESTING = False
+TESTING = True
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 if TESTING:
 
     UI_FILE = os.path.join(PROJECT_DIR, "ui", "form.ui")
-    PY_FILE = os.path.join(PROJECT_DIR, "src", "ui_form.py")
+    PY_FILE = os.path.join(PROJECT_DIR, "src", "ui_python", "ui_form.py")
     UIC_EXE = os.path.join(PROJECT_DIR, ".qtcreator", "Python_3_10_10venv", "Scripts", "pyside6-uic.exe")
 
     # Automatically regenerate Python file from UI if needed
@@ -52,7 +53,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def _dialog_init(self):
         self.canny_dialog = CannyDialog(self.cv_image, self)
         self.vp_dialog = VanishingPointDialog(self.cv_image, self)
-        self.dialogs = [self.canny_dialog, self.vp_dialog]
+        self.grid_dialog = GridDialog(self.cv_image, self)
+        self.dialogs = [self.canny_dialog, self.vp_dialog, self.grid_dialog]
 
     def _menuBar_init(self):
         self.actionLoadImage = self.menuFile.addAction("Load Image")
@@ -60,12 +62,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSaveImageAs = self.menuFile.addAction("Save Image as...")
         self.actionCannyEdge = self.menuTools.addAction("Canny Edge")
         self.actionVanishingPoint = self.menuTools.addAction("Find Vanishing Point")
+        self.actionDrawGrid = self.menuTools.addAction("Draw grid")
 
         self.actionLoadImage.triggered.connect(self.load_image)
         self.actionSaveImage.triggered.connect(self.save_image)
         self.actionSaveImageAs.triggered.connect(self.save_image_as)
         self.actionCannyEdge.triggered.connect(self.open_canny_dialog)
         self.actionVanishingPoint.triggered.connect(self.open_vanishing_point_dialog)
+        self.actionDrawGrid.triggered.connect(self.open_grid_dialog)
 
     # --- "public" functions ---
 
@@ -149,6 +153,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.vp_dialog.sendImage.connect(self.handle_processed_image)
         self.vp_dialog.requestImage.connect(self.handle_request_image)
         self.vp_dialog.show()
+
+    def open_grid_dialog(self):
+        self.dialogs[2] = GridDialog(self.cv_image, self)
+        self.grid_dialog = self.dialogs[2]
+        self.grid_dialog.sendImage.connect(self.handle_processed_image)
+        self.grid_dialog.requestImage.connect(self.handle_request_image)
+        self.grid_dialog.show()
 
     # Display functions
     def display_pixmap(self, pixmap):

@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QSlider, QDialogButtonBox
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap, QPainter, QImage, QIcon
-from ui_vanishing_point_dialog import Ui_Dialog
+from ui_python.ui_vanishing_point_dialog import Ui_Dialog
 
 
 TESTING = True
@@ -18,7 +18,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 if TESTING:
     UI_FILE = os.path.abspath(os.path.join(BASE_DIR, "..", "ui", "vanishing_point_dialog.ui"))
-    PY_FILE = os.path.abspath(os.path.join(BASE_DIR, "ui_vanishing_point_dialog.py"))
+    PY_FILE = os.path.abspath(os.path.join(BASE_DIR, "ui_python", "ui_vanishing_point_dialog.py"))
     UIC_EXE = os.path.join(BASE_DIR, "..", ".qtcreator", "Python_3_10_10venv", "Scripts", "pyside6-uic.exe")
 
     # Automatically regenerate Python file from UI if needed

@@ -4,10 +4,14 @@
         "src/vanishing_point_dialog.py",
         "src/canny_dialog.py",
         "src/mainwindow.py",
-        "src/ui_canny_dialog.py",
-        "src/ui_form.py",
         "ui/canny_dialog.ui",
         "ui/form.ui",
-        "ui/vanishing_point_dialog.ui"
+        "ui/vanishing_point_dialog.ui",
+        "src/grid_dialog.py",
+        "ui/grid_dialog.ui",
+        "src/ui_python/ui_canny_dialog.py",
+        "src/ui_python/ui_form.py",
+        "src/ui_python/ui_grid_dialog.py",
+        "src/ui_python/ui_vanishing_point_dialog.py"
     ]
 }

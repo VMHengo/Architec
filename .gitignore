@@ -110,9 +110,8 @@ scripts/
 build/
 *.spec
 
-# Ignore everything in dist except exe
+# Ignore everything in dist
 dist/*
-!dist/*.exe
 
 # OS-specific
 .DS_Store

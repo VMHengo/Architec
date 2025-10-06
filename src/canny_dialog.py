@@ -6,7 +6,7 @@ import numpy as np
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QSlider, QDialogButtonBox
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap, QPainter, QImage, QIcon
-from ui_canny_dialog import Ui_Dialog
+from ui_python.ui_canny_dialog import Ui_Dialog
 
 
 TESTING = True
@@ -14,7 +14,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 if TESTING:
     UI_FILE = os.path.abspath(os.path.join(BASE_DIR, "..", "ui", "canny_dialog.ui"))
-    PY_FILE = os.path.abspath(os.path.join(BASE_DIR, "ui_canny_dialog.py"))
+    PY_FILE = os.path.abspath(os.path.join(BASE_DIR, "ui_python", "ui_canny_dialog.py"))
     UIC_EXE = os.path.join(BASE_DIR, "..", ".qtcreator", "Python_3_10_10venv", "Scripts", "pyside6-uic.exe")
 
     # Automatically regenerate Python file from UI if needed
@@ -43,17 +43,8 @@ class CannyDialog(QDialog, Ui_Dialog):
         reset_btn = self.buttonBox.button(QDialogButtonBox.Reset)
 
         # slider setup
-        self.slider_upperThresh.setMinimum(0)
-        self.slider_upperThresh.setMaximum(500)
-        self.slider_upperThresh.setValue(150)
-        self.slider_upperThresh.setSingleStep(1)
-        self.slider_upperThresh.setPageStep(10)
-
-        self.slider_lowerThresh.setMinimum(0)
-        self.slider_lowerThresh.setMaximum(500)
-        self.slider_lowerThresh.setValue(150)
-        self.slider_lowerThresh.setSingleStep(1)
-        self.slider_lowerThresh.setPageStep(10)
+        self.setup_sliders(self.slider_upperThresh, 0, 500, 150, 1, 10)
+        self.setup_sliders(self.slider_lowerThresh, 0, 500, 150, 1, 10)
 
         # Connect signals
         apply_btn.clicked.connect(self.apply_canny_edge)
@@ -61,6 +52,13 @@ class CannyDialog(QDialog, Ui_Dialog):
         reset_btn.clicked.connect(self.on_reset)
         self.slider_upperThresh.valueChanged.connect(self.update_thresholds)
         self.slider_lowerThresh.valueChanged.connect(self.update_thresholds)
+
+    def setup_sliders(self, slider, min, max, val, singleStep, pageStep):
+        slider.setMinimum(min)
+        slider.setMaximum(max)
+        slider.setValue(val)
+        slider.setSingleStep(singleStep)
+        slider.setPageStep(pageStep)
 
     def update_thresholds(self):
         t1 = self.slider_upperThresh.value()
