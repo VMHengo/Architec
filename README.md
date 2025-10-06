@@ -1,4 +1,4 @@
-<h2>Architex - Image Editing Software</h2>
+<h1>Architec - Image Editing Software</h2>
 
 ## Description
 This is a small personal project I created to explore my new interest in Computer Vision in combination with my hobby architectural sketching. 
