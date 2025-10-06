@@ -31,8 +31,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        self.cv_image = None
+        self.cv_image = None # type: np array
 
+        self._ui_init()
+        self._dialog_init()
+        self._menuBar_init()
+
+        self.last_dir = None
+        self.current_file_path = None
+
+    # --- "private" functions ---
+    def _ui_init(self):
         icon_filePath = os.path.join(PROJECT_DIR, "assets", "icon.ico")
         self.setWindowIcon(QIcon(icon_filePath))
         self.setWindowTitle("Architec 0.1")
@@ -40,16 +49,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.scene = QGraphicsScene()
         self.graphicsView.setScene(self.scene)
 
+    def _dialog_init(self):
+        self.canny_dialog = CannyDialog(self.cv_image, self)
+        self.vp_dialog = VanishingPointDialog(self.cv_image, self)
+        self.dialogs = [self.canny_dialog, self.vp_dialog]
+
+    def _menuBar_init(self):
         self.actionLoadImage = self.menuFile.addAction("Load Image")
+        self.actionSaveImage = self.menuFile.addAction("Save Image")
+        self.actionSaveImageAs = self.menuFile.addAction("Save Image as...")
         self.actionCannyEdge = self.menuTools.addAction("Canny Edge")
         self.actionVanishingPoint = self.menuTools.addAction("Find Vanishing Point")
 
         self.actionLoadImage.triggered.connect(self.load_image)
+        self.actionSaveImage.triggered.connect(self.save_image)
+        self.actionSaveImageAs.triggered.connect(self.save_image_as)
         self.actionCannyEdge.triggered.connect(self.open_canny_dialog)
         self.actionVanishingPoint.triggered.connect(self.open_vanishing_point_dialog)
 
-        self.last_dir = ""
+    # --- "public" functions ---
 
+    # Menubar [ File ] functions
     def load_image(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self,
@@ -83,6 +103,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         resized = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
         self.cv_image = resized.copy()
 
+        for dialog in self.dialogs:
+            dialog.imageData = self.cv_image.copy()
+
         # Convert to QPixmap
         qimg = QImage(
             resized.data,
@@ -95,6 +118,39 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.display_pixmap(pixmap)
 
+    def save_image(self):
+        if self.current_file_path:
+            cv2.imwrite(self.current_file_path, self.cv_image)
+        else:
+            self.save_image_as()
+
+    def save_image_as(self):
+        options = QFileDialog.Options()
+        file_path, _ = QFileDialog.getSaveFileName(None,
+                                                   "Save Image As",
+                                                   "",
+                                                   "JPEG Files (*.jpg);;PNG Files (*.png);;All Files (*)",
+                                                   options=options)
+        if file_path:
+            self.current_file_path = file_path
+            cv2.imwrite(file_path, self.cv_image)
+
+    # Menubar [ Tools ] functions
+    def open_canny_dialog(self):
+        self.dialogs[0] = CannyDialog(self.cv_image, self)
+        self.canny_dialog = self.dialogs[0]
+        self.canny_dialog.sendImage.connect(self.handle_processed_image)
+        self.canny_dialog.requestImage.connect(self.handle_request_image)
+        self.canny_dialog.show()
+
+    def open_vanishing_point_dialog(self):
+        self.dialogs[1] = VanishingPointDialog(self.cv_image, self)
+        self.vp_dialog = self.dialogs[1]
+        self.vp_dialog.sendImage.connect(self.handle_processed_image)
+        self.vp_dialog.requestImage.connect(self.handle_request_image)
+        self.vp_dialog.show()
+
+    # Display functions
     def display_pixmap(self, pixmap):
         self.scene.clear()
         pixmap_item = self.scene.addPixmap(pixmap)
@@ -108,23 +164,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pixmap = QPixmap.fromImage(qimage)
         self.display_pixmap(pixmap)
 
-    def open_canny_dialog(self):
-        dialog = CannyDialog(self.cv_image, self)
-        dialog.sendImage.connect(self.handle_processed_image)
-        dialog.requestImage.connect(self.handle_request_image)
-        dialog.show()
-
-    def open_vanishing_point_dialog(self):
-        dialog = VanishingPointDialog(self.cv_image, self)
-        dialog.sendImage.connect(self.handle_processed_image)
-        dialog.requestImage.connect(self.handle_request_image)
-        dialog.show()
-        self.open_canny_dialog()
-
+    # MOSI communication functions
     def handle_request_image(self):
         sender = self.sender()
         if sender:
-            sender.receiveImage(self.cv_image)
+            sender.receiveImage(self.cv_image.copy())
 
     def handle_processed_image(self, img):
         sender = self.sender()

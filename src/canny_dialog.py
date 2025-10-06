@@ -9,7 +9,7 @@ from PySide6.QtGui import QPixmap, QPainter, QImage, QIcon
 from ui_canny_dialog import Ui_Dialog
 
 
-TESTING = False
+TESTING = True
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 if TESTING:
@@ -42,12 +42,18 @@ class CannyDialog(QDialog, Ui_Dialog):
         cancel_btn = self.buttonBox.button(QDialogButtonBox.Cancel)
         reset_btn = self.buttonBox.button(QDialogButtonBox.Reset)
 
-        # dont know why values in ui dont work
+        # slider setup
         self.slider_upperThresh.setMinimum(0)
-        self.slider_upperThresh.setMaximum(300)
+        self.slider_upperThresh.setMaximum(500)
         self.slider_upperThresh.setValue(150)
         self.slider_upperThresh.setSingleStep(1)
         self.slider_upperThresh.setPageStep(10)
+
+        self.slider_lowerThresh.setMinimum(0)
+        self.slider_lowerThresh.setMaximum(500)
+        self.slider_lowerThresh.setValue(150)
+        self.slider_lowerThresh.setSingleStep(1)
+        self.slider_lowerThresh.setPageStep(10)
 
         # Connect signals
         apply_btn.clicked.connect(self.apply_canny_edge)
@@ -82,13 +88,15 @@ class CannyDialog(QDialog, Ui_Dialog):
 
     def on_reset(self):
         self.processed_img = None
-        self.sendImage.emit(self.imageData)
+        self.sendImage.emit(self.imageData.copy())
 
     # --- Signal functions ---
 
     def receiveImage(self, img):
-        self.imageData = img
+        self.imageData = img.copy()
+        self.processed_img = self.imageData
+        self.sendProcessedImage()
 
     def sendProcessedImage(self):
         if self.processed_img.any():
-            self.sendImage.emit(self.processed_img)
+            self.sendImage.emit(self.processed_img.copy())

@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="maximum">
-    <number>300</number>
+    <number>500</number>
    </property>
    <property name="value">
     <number>150</number>
@@ -44,8 +44,11 @@
    <property name="layoutDirection">
     <enum>Qt::LayoutDirection::LeftToRight</enum>
    </property>
+   <property name="maximum">
+    <number>500</number>
+   </property>
    <property name="value">
-    <number>50</number>
+    <number>150</number>
    </property>
    <property name="orientation">
     <enum>Qt::Orientation::Horizontal</enum>
@@ -95,12 +98,12 @@
     <rect>
      <x>190</x>
      <y>80</y>
-     <width>71</width>
+     <width>101</width>
      <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>Threshold: 50</string>
+    <string>Threshold: 150</string>
    </property>
   </widget>
   <widget class="QDialogButtonBox" name="buttonBox">
