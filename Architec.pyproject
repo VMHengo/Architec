@@ -12,6 +12,7 @@
         "src/ui_python/ui_canny_dialog.py",
         "src/ui_python/ui_form.py",
         "src/ui_python/ui_grid_dialog.py",
-        "src/ui_python/ui_vanishing_point_dialog.py"
+        "src/ui_python/ui_vanishing_point_dialog.py",
+        "src/recent_files.py"
     ]
 }
