@@ -16,7 +16,3 @@ Currently the project is in its baby stage. It is coded in QTCreator and only co
 - The first problem is in the feature extraction as the amount of clutter in images lead to many undesired edges 
 when detecting them with Canny Edge detector for example.
 - The second problem is the prediction of the vanishing point as RANSAC isnt accurate with the current features
-  
-### Grid drawing
-
-### Saving images
