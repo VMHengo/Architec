@@ -1,4 +1,5 @@
 <h1>Architec - Image Editing Software</h2>
+<img src="https://github.com/VMHengo/Architec/blob/master/assets/gridShowCase.gif" width="400" alt="Cool animation">
 
 ## Description
 This is a small personal project I created to explore my new interest in Computer Vision in combination with my hobby architectural sketching. 
