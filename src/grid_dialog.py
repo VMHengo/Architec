@@ -3,9 +3,9 @@ import cv2
 import os
 import subprocess
 import numpy as np
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QSlider, QDialogButtonBox
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QSlider, QDialogButtonBox, QStyleFactory, QGraphicsScene
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QPixmap, QPainter, QImage, QIcon
+from PySide6.QtGui import QPixmap, QPainter, QImage, QIcon, QColor
 from ui_python.ui_grid_dialog import Ui_Dialog
 
 
@@ -45,13 +45,44 @@ class GridDialog(QDialog, Ui_Dialog):
         # slider setup
         self.setup_sliders(self.slider_resolution, 2, 30, 10, 1, 10)
         self.setup_sliders(self.slider_lineThickness, 1, 30, 5, 1, 10)
+        self.setup_colorSelect()
 
         # Connect signals
         apply_btn.clicked.connect(self.draw_grid)
         cancel_btn.clicked.connect(self.reject)
         reset_btn.clicked.connect(self.on_reset)
+
         self.slider_resolution.valueChanged.connect(self.update_thresholds)
         self.slider_lineThickness.valueChanged.connect(self.update_thresholds)
+
+        self.selectedColor = {
+            "red" : 0,
+            "green" : 0,
+            "blue" : 0
+        }
+        self.scene = QGraphicsScene(self)
+        self.scene.setBackgroundBrush(QColor(self.selectedColor["red"], self.selectedColor["green"], self.selectedColor["blue"]))
+        self.graphicsView_colorShow.setScene(self.scene)
+
+    def setup_colorSelect(self):
+
+        for color in ["red", "green", "blue"]:
+            scrollbar = getattr(self, f"scrollBar_{color}")
+            scrollbar.valueChanged.connect(lambda _, c = color: self.update_spinBox(c))
+
+            spinBox = getattr(self, f"spinBox_rgb_{color}")
+            spinBox.valueChanged.connect(lambda _, c = color: self.update_scrollBar(c))
+
+        to_style_change = [
+            self.spinBox_rgb_red,
+            self.spinBox_rgb_green,
+            self.spinBox_rgb_blue,
+            self.scrollBar_red,
+            self.scrollBar_green,
+            self.scrollBar_blue,
+        ]
+        self.setStyle(to_style_change, "Fusion")
+        self.spinBox_rgb_red.setStyle(QStyleFactory.create("Fusion"))
 
     def setup_sliders(self, slider, min, max, val, singleStep, pageStep):
         slider.setMinimum(min)
@@ -69,6 +100,26 @@ class GridDialog(QDialog, Ui_Dialog):
         if self.checkBox_toggleLive.isChecked():
             self.draw_grid()
 
+    def update_spinBox(self, color):
+        value = getattr(self, f"scrollBar_{color}").value()
+        spinBox = getattr(self, f"spinBox_rgb_{color}")
+        spinBox.setValue(value)
+        self.selectedColor[color] = value
+        self.update_colorShow()
+
+    def update_scrollBar(self, color):
+        value = getattr(self, f"spinBox_rgb_{color}").value()
+        scrollBar = getattr(self, f"scrollBar_{color}")
+        scrollBar.setValue(value)
+        self.selectedColor[color] = value
+        self.update_colorShow()
+
+    def update_colorShow(self):
+        self.scene.setBackgroundBrush(QColor(self.selectedColor["red"], self.selectedColor["green"], self.selectedColor["blue"]))
+
+        if self.checkBox_toggleLive.isChecked():
+            self.draw_grid()
+
     # --- Button functions ---
 
     def draw_grid(self):
@@ -78,12 +129,13 @@ class GridDialog(QDialog, Ui_Dialog):
         lineThickness = self.slider_lineThickness.value()
         resolution = self.slider_resolution.value()
 
-        rect_size = max(height, width) // resolution
+        rect_size = max(height, width) / resolution
 
         for i in range(1, resolution):
-            dim = i*rect_size
-            cv2.line(img, (dim,0), (dim, height), (0,0,0), lineThickness)
-            cv2.line(img, (0, dim), (width, dim), (0,0,0), lineThickness)
+            color = (self.selectedColor["blue"], self.selectedColor["green"], self.selectedColor["red"])
+            dim = round(i*rect_size)
+            cv2.line(img, (dim,0), (dim, height), color, lineThickness)
+            cv2.line(img, (0, dim), (width, dim), color, lineThickness)
 
         self.processed_img = img
         self.sendProcessedImage()
@@ -105,3 +157,9 @@ class GridDialog(QDialog, Ui_Dialog):
     def sendProcessedImage(self):
         if self.processed_img.any():
             self.sendImage.emit(self.processed_img.copy())
+
+    # --- helper functions
+
+    def setStyle(self, tobeChanged, style):
+        for element in tobeChanged:
+            element.setStyle(QStyleFactory.create(style))

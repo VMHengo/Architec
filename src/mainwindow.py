@@ -3,17 +3,19 @@ import os
 import cv2
 import subprocess
 import numpy as np
+import time
 from appdirs import user_data_dir
 from PySide6.QtWidgets import QDialog, QApplication, QMainWindow, QFileDialog, QGraphicsScene, QWidget
 from PySide6.QtGui import QPixmap, QPainter, QImage, QIcon, QAction
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, Qt, QSettings
-
+from roboflow import Roboflow
 from ui_python.ui_form import Ui_MainWindow
 from canny_dialog import CannyDialog
 from grid_dialog import GridDialog
 from vanishing_point_dialog import VanishingPointDialog
 from recent_files import add_recent_file, load_recent_files
+from roboflow_funcs import roboflow_setup, roboflow_segmentation
 
 
 APP_NAME = "Architec"
@@ -22,15 +24,13 @@ APP_AUTHOR = "HoangNguyen"
 TESTING = True
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-if TESTING:
-
-    UI_FILE = os.path.join(PROJECT_DIR, "ui", "form.ui")
-    PY_FILE = os.path.join(PROJECT_DIR, "src", "ui_python", "ui_form.py")
-    UIC_EXE = os.path.join(PROJECT_DIR, ".qtcreator", "Python_3_10_10venv", "Scripts", "pyside6-uic.exe")
+  #  UI_FILE = os.path.join(PROJECT_DIR, "ui", "form.ui")
+   # PY_FILE = os.path.join(PROJECT_DIR, "src", "ui_python", "ui_form.py")
+    #UIC_EXE = os.path.join(PROJECT_DIR, ".qtcreator", "Python_3_10_10venv", "Scripts", "pyside6-uic.exe")
 
     # Automatically regenerate Python file from UI if needed
-    if not os.path.exists(PY_FILE) or os.path.getmtime(UI_FILE) > os.path.getmtime(PY_FILE):
-        subprocess.run([UIC_EXE, UI_FILE, "-o", PY_FILE], check=True)
+    #if not os.path.exists(PY_FILE) or os.path.getmtime(UI_FILE) > os.path.getmtime(PY_FILE):
+     #   subprocess.run([UIC_EXE, UI_FILE, "-o", PY_FILE], check=True)
 
 
 # ---- MAIN CLASS ----
@@ -90,6 +90,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         actionDrawGrid = self.menuTools.addAction("Draw grid")
         actionDrawGrid.triggered.connect(self.open_grid_dialog)
+
+        actionSegment = self.menuTools.addAction("Segmentation")
+        actionSegment.triggered.connect(self.segment_img)
 
         # updates
         self.update_recent_files_menu()
@@ -189,6 +192,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.grid_dialog.requestImage.connect(self.handle_request_image)
         self.grid_dialog.show()
 
+    def segment_img(self):
+        model = roboflow_setup()
+        masked_image = roboflow_segmentation(model, self.cv_image.copy())
+        self.display_image_data(masked_image)
 
     # Display functions
 
