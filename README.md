@@ -1,5 +1,5 @@
 <h1>Architec - Image Editing Software</h2>
-![Demo](./assets/gridShowCase.gif)
+<img src="./assets/gridShowCase.gif" width="800">
 
 ## Description
 This is a small personal project I created to explore my new interest in Computer Vision in combination with my hobby architectural sketching. 
